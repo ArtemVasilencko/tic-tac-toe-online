@@ -1,8 +1,8 @@
 import clsx from "clsx";
+import { useEffect, useState } from "react";
 import { Profile } from "../profile";
 import { GAME_SYMBOLS } from "./constants";
 import { GameSymbol } from "./game-symbol";
-
 import avatarSrc1 from "./images/avatar-1.png";
 import avatarSrc2 from "./images/avatar-2.png";
 import avatarSrc3 from "./images/avatar-3.png";
@@ -39,7 +39,7 @@ const players = [
   },
 ];
 
-export function GameInfo({ className, playersCount }) {
+export function GameInfo({ className, playersCount, currentMove }) {
   return (
     <div
       className={clsx(
@@ -53,6 +53,7 @@ export function GameInfo({ className, playersCount }) {
             key={player.id}
             playerInfo={player}
             isRight={index % 2 === 1}
+            isTimerRunning={currentMove === player.symbol}
           />
         );
       })}
@@ -60,7 +61,33 @@ export function GameInfo({ className, playersCount }) {
   );
 }
 
-function PlayerInfo({ playerInfo, isRight }) {
+function PlayerInfo({ playerInfo, isRight, isTimerRunning }) {
+  const [seconds, setSeconds] = useState(12);
+
+  const minutesString = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const secondsString = String(seconds % 60).padStart(2, "0");
+
+  const isDanger = seconds < 10;
+
+  function getTimerColor() {
+    if (isTimerRunning) {
+      return isDanger ? "text-orange-600" : "text-slate-900";
+    }
+    return "text-slate-200";
+  }
+
+  useEffect(() => {
+    if (!isTimerRunning) return;
+    const intervalId = setInterval(() => {
+      setSeconds((prevSec) => Math.max(prevSec - 1, 0));
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+      setSeconds(60);
+    };
+  }, [isTimerRunning]);
+
   return (
     <div className="flex gap-3 items-center">
       <div className={clsx("relative", isRight && "order-3")}>
@@ -77,11 +104,12 @@ function PlayerInfo({ playerInfo, isRight }) {
       <div className={clsx("h-6 w-px bg-slate-200", isRight && "order-2")} />
       <div
         className={clsx(
-          "text-slate-900 text-lg font-semibold",
+          "text-lg font-semibold w-[60px]",
           isRight && "order-1",
+          getTimerColor(),
         )}
       >
-        01:08
+        {minutesString}:{secondsString}
       </div>
     </div>
   );
