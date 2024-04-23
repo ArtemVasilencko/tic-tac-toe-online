@@ -1,6 +1,8 @@
 import { useReducer } from "react";
+import { useInterval } from "../lib/timers";
 import { UiButton } from "../uikit/ui-button";
 import { PLAYERS, PLAYERS_COUNT, TIME_ON_MOVE } from "./constants";
+import { computePlayerTimer } from "./model/compute-player-timer";
 import { computeWinner } from "./model/compute-winner";
 import { computeWinnerSymbol } from "./model/compute-winner-symbol";
 import {
@@ -21,14 +23,22 @@ import { PlayerInfo } from "./ui/player-info";
 export function Game() {
   const [gameState, dispatch] = useReducer(
     gameStateReducer,
-    { playersCount: PLAYERS_COUNT },
+    {
+      playersCount: PLAYERS_COUNT,
+      defaultTimer: 60000,
+      currentMoveStart: Date.now(),
+    },
     initialGameState,
   );
 
   const winnerSequence = computeWinner(gameState.cells);
-  const nextMove = getNextMove(gameState.currentMove, PLAYERS_COUNT);
+  const nextMove = getNextMove(gameState);
   const winnerSymbol = computeWinnerSymbol(gameState, winnerSequence, nextMove);
   const winnerPlayer = PLAYERS.find((player) => player.symbol === winnerSymbol);
+
+  useInterval(1000, !!gameState.currentMoveStart && !winnerSymbol, () => {
+    dispatch({ type: GAME_STATE_ACTIONS.TICK, now: Date.now() });
+  });
 
   return (
     <>
@@ -42,17 +52,24 @@ export function Game() {
             timeMode={TIME_ON_MOVE}
           />
         }
-        playersList={PLAYERS.slice(0, PLAYERS_COUNT).map((player, index) => (
-          <PlayerInfo
-            key={player.id}
-            name={player.name}
-            rating={player.rating}
-            avatar={player.avatar}
-            symbol={player.symbol}
-            isRight={index % 2 === 1}
-            seconds={60}
-          />
-        ))}
+        playersList={PLAYERS.slice(0, PLAYERS_COUNT).map((player, index) => {
+          const { timer, timerStartAt } = computePlayerTimer(
+            gameState,
+            player.symbol,
+          );
+          return (
+            <PlayerInfo
+              key={player.id}
+              name={player.name}
+              rating={player.rating}
+              avatar={player.avatar}
+              symbol={player.symbol}
+              isRight={index % 2 === 1}
+              timer={timer}
+              timerStartAt={timerStartAt}
+            />
+          );
+        })}
         actions={
           <>
             <UiButton size="md" variant="primary">
@@ -79,23 +96,32 @@ export function Game() {
               dispatch({
                 type: GAME_STATE_ACTIONS.CELL_CLICK,
                 index: index,
+                now: Date.now(),
               });
             }}
           />
         ))}
       />
       <GameOverModal
-        players={PLAYERS.slice(0, PLAYERS_COUNT).map((player, index) => (
-          <PlayerInfo
-            key={player.id}
-            name={player.name}
-            rating={player.rating}
-            avatar={player.avatar}
-            symbol={player.symbol}
-            isRight={index % 2 === 1}
-            seconds={60}
-          />
-        ))}
+        players={PLAYERS.slice(0, PLAYERS_COUNT).map((player, index) => {
+          const { timer, timerStartAt } = computePlayerTimer(
+            gameState,
+            player.symbol,
+          );
+          return (
+            <PlayerInfo
+              key={player.id}
+              name={player.name}
+              rating={player.rating}
+              avatar={player.avatar}
+              symbol={player.symbol}
+              isRight={index % 2 === 1}
+              timer={timer}
+              timerStartAt={timerStartAt}
+              isWinner={!!winnerSymbol}
+            />
+          );
+        })}
         winnerName={winnerPlayer?.name || ""}
       />
     </>

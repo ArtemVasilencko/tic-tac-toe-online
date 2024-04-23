@@ -1,3 +1,4 @@
+import { StaticImageData } from "next/image";
 import avatarSrc1 from "./ui/images/avatar-1.png";
 import avatarSrc2 from "./ui/images/avatar-2.png";
 import avatarSrc3 from "./ui/images/avatar-3.png";
@@ -48,6 +49,6 @@ export const PLAYERS = [
   },
 ];
 
-export const PLAYERS_COUNT = 4;
+export const PLAYERS_COUNT = 2;
 export const NOT_FOUND_INDEX = -1;
 export const TIME_ON_MOVE = "1 мин на ход";

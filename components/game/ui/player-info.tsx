@@ -1,6 +1,7 @@
+import clsx from "clsx";
 import Image, { StaticImageData } from "next/image";
 import { GameSymbol } from "./game-symbol";
-import clsx from "clsx";
+import { useNow } from "../../lib/timers";
 
 interface PlayerInfoPropsI {
   isRight: boolean;
@@ -8,8 +9,9 @@ interface PlayerInfoPropsI {
   rating: number;
   avatar: StaticImageData;
   symbol: string;
-  isTimerRunning?: boolean;
-  seconds: number;
+  timer: number;
+  timerStartAt: number | undefined;
+  isWinner?: boolean;
 }
 
 export function PlayerInfo({
@@ -18,15 +20,20 @@ export function PlayerInfo({
   rating,
   avatar,
   symbol,
-  isTimerRunning,
-  seconds,
+  timer,
+  timerStartAt,
+  isWinner,
 }: PlayerInfoPropsI) {
+  const now = useNow(1000, !!timerStartAt && !isWinner);
+  const mils = Math.max(now ? timer - (now - (timerStartAt || 0)) : timer, 0);
+
+  const seconds = Math.ceil(mils / 1000);
   const minutesString = String(Math.floor(seconds / 60)).padStart(2, "0");
   const secondsString = String(seconds % 60).padStart(2, "0");
   const isDanger = seconds < 10;
 
   function getTimerColor() {
-    if (isTimerRunning) {
+    if (timerStartAt && !isWinner) {
       return isDanger ? "text-orange-600" : "text-slate-900";
     }
     return "text-slate-200";
