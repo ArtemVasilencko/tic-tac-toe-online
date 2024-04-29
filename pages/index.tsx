@@ -1,25 +1,25 @@
-import { ReactNode } from "react";
-import { Header } from "../components/header";
-import { Game } from "../components/game";
+import { ReactNode } from 'react'
+import { Header } from '../components/header'
+import { Game } from '../components/game'
 
 interface HomePageLayoutPropsI {
-  header: ReactNode;
-  children: ReactNode;
+    header: ReactNode
+    children: ReactNode
 }
 
 export default function HomePage() {
-  return (
-    <HomePageLayout header={<Header />}>
-      <Game />
-    </HomePageLayout>
-  );
+    return (
+        <HomePageLayout header={<Header />}>
+            <Game />
+        </HomePageLayout>
+    )
 }
 
 function HomePageLayout({ header, children }: HomePageLayoutPropsI) {
-  return (
-    <div className="bg-slate-50 min-h-screen">
-      {header}
-      <main className="pt-6 mx-auto w-max">{children}</main>
-    </div>
-  );
+    return (
+        <div className="bg-slate-50 min-h-screen">
+            {header}
+            <main className="pt-6 mx-auto w-max">{children}</main>
+        </div>
+    )
 }

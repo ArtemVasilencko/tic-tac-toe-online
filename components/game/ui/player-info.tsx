@@ -2,6 +2,7 @@ import clsx from "clsx";
 import Image, { StaticImageData } from "next/image";
 import { GameSymbol } from "./game-symbol";
 import { useNow } from "../../lib/timers";
+import { memo } from "react";
 
 interface PlayerInfoPropsI {
   isRight: boolean;
@@ -14,7 +15,7 @@ interface PlayerInfoPropsI {
   isWinner?: boolean;
 }
 
-export function PlayerInfo({
+export const PlayerInfo = function PlayerInfo({
   isRight,
   name,
   rating,
@@ -65,4 +66,4 @@ export function PlayerInfo({
       </div>
     </div>
   );
-}
+};
